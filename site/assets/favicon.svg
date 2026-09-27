@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Somatic Canticles sigil">
+  <g fill="none" stroke="#C4873B" stroke-linejoin="round">
+    <path d="M32 5 L60 56 H4 Z" stroke-width="5"/>
+    <path d="M32 24 L45 48 H19 Z" stroke-width="3.5"/>
+  </g>
+  <circle cx="32" cy="40" r="3" fill="#C4873B"/>
+</svg>
