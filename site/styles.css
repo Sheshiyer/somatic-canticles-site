@@ -517,3 +517,6 @@ main:focus { outline: none; }
   .spine-cursor { display: none; }
   .film::before { animation: none !important; opacity: 1; }
 }
+
+/* Guard: decorative crop marks bleed ~4px at 320px widths. clip (not hidden) keeps position: sticky working. */
+html, body { overflow-x: clip; }

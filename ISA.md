@@ -4,7 +4,7 @@ project: somatic-canticles-landing
 effort: E4
 effort_source: auto
 phase: verify
-progress: 19/84
+progress: 20/84
 mode: interactive
 started: 2026-09-26T03:18:00-07:00
 updated: 2026-09-26T03:25:00-07:00
@@ -194,7 +194,7 @@ Ship a zero-build static landing site in `Sheshiyer/somatic-canticles-landing` t
 - [ ] ISC-83: Antecedent: the hero video is visibly moving within 2s of load on desktop (Browser pane at t≈2s)
 
 ### Deploy
-- [ ] ISC-84: a Vercel preview URL returns 200 for `/` and for `/assets/brag.mp4`
+- [x] ISC-84: a Vercel preview URL returns 200 for `/` and for `/assets/brag.mp4`
 
 ## Test Strategy
 
@@ -239,9 +239,12 @@ Ship a zero-build static landing site in `Sheshiyer/somatic-canticles-landing` t
 - 2026-09-27 14:30: The judge+synthesize workflow failed its StructuredOutput return twice, but both times the files had already been written to disk before the failure — a reporting failure, not a build failure. Verified via check-site.mjs (9/9 pass) and Browser-pane inspection at 1440px and 375px (zero console errors, zero 404s, no horizontal overflow) rather than re-running the expensive agent a third time. Judge panel: Atlas won on all 3 lenses.
 - 2026-09-27 14:35: wrote README.md and vercel.json by hand (the synthesize agent's final turn was consumed by the failed StructuredOutput call before it reached these two files).
 - 2026-09-27 14:40: created public repo Sheshiyer/somatic-canticles-site (author chose public-now over private-then-flip). Pushing first commit now with placeholder brag.mp4/brag.jpg (copies of the existing trilogy trailer) — the real /brag film has not been generated yet.
+- 2026-10-04 21:55: refined: hosting moved from Vercel to Cloudflare at the author's request. Deployed as a static-assets Worker `somatic-canticles-site` (wrangler profile 9d9d, account 9d9d23b2…) with Workers custom domain somatic.tryambakam.space. Chose a Worker over Pages because the OAuth token lacks DNS scopes and Workers custom domains create DNS + cert automatically. The name avoids collision with the existing `somatic-canticles` Worker on khaloree.tryambakam.space. Headers ported from vercel.json to site/_headers. vercel.json kept but unused.
+- 2026-10-04 21:58: fixed 4px horizontal overflow at 320px (decorative crop marks) with html,body{overflow-x:clip}. Verified clean at 320/375/600/800/1024/1440.
 
 ## Verification
 
 - ISC-6: Grep: PRODUCT.md has Register, Users, Product Purpose, Brand Personality, Anti-references, Design Principles, Accessibility & Inclusion headings
 - ISC-8: Grep: COPY.md pins v3 @ ba74a874 (short ba74a87) with per-block source lines (15 "source" refs)
 - ISC-69: stat: cover-book1 168954 B, cover-book2 129100 B, cover-book3 113556 B (all ≤ 250 KB)
+- ISC-84: curl: https://somatic.tryambakam.space/ -> 200 text/html, /assets/brag.mp4 -> 200 video/mp4, /nope -> 404; CSP/nosniff/referrer headers present; Browser pane: fonts loaded (Cinzel, EB Garamond, Fira Code), video playing, 0 console errors. (Criterion was written for a Vercel preview; satisfied on Cloudflare production instead.)
