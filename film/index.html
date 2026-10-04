@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Somatic Canticles — launch film</title>
+<style>
+  html, body { margin: 0; background: #060E1B; color: #8A9BA8; font: 13px "Fira Code", monospace; }
+  canvas { display: block; }
+  body.dev { display: grid; place-items: center; min-height: 100vh; gap: 10px; }
+  body.dev canvas { width: min(96vw, calc((100vh - 70px) * 16 / 9)); height: auto; }
+  #bar { display: none; gap: 12px; align-items: center; width: min(96vw, calc((100vh - 70px) * 16 / 9)); }
+  body.dev #bar { display: flex; }
+  #scrub { flex: 1; accent-color: #C4873B; }
+  button { background: #12233B; color: #F0EDE3; border: 1px solid #8A9BA8; padding: 4px 12px; font: inherit; cursor: pointer; }
+</style>
+</head>
+<body>
+<canvas id="reel" width="1920" height="1080"></canvas>
+<div id="bar"><button id="play">play</button><input id="scrub" type="range" min="0" max="899" value="0"><span id="status"></span></div>
+<audio id="audio" src="/audio.wav" preload="auto"></audio>
+<script type="module" src="/dist/main.js"></script>
+</body>
+</html>

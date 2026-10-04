@@ -1,0 +1,26 @@
+{
+  "name": "somatic-canticles-film",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic 15 s launch film for Somatic Canticles: canvas/WebGL engine, headless Chromium capture, ffmpeg encode, synthesized score. The /brag process, the house showreel engine, no Remotion.",
+  "scripts": {
+    "build": "bun build src/main.ts --outdir dist --target browser",
+    "typecheck": "tsc --noEmit",
+    "audio": "bun tools/audio.ts",
+    "dev": "bun run build && bun tools/serve.ts",
+    "stills": "bun run build && bun tools/render.ts --stills",
+    "render": "bun run build && bun tools/render.ts",
+    "render:preview": "bun run build && bun tools/render.ts --preview",
+    "mux": "bun tools/mux.ts",
+    "verify": "bun tools/verify.ts"
+  },
+  "dependencies": {
+    "@fontsource/cinzel": "^5.3.0",
+    "@fontsource/eb-garamond": "^5.3.0",
+    "@fontsource/fira-code": "^5.3.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.2",
+    "typescript": "^7.0.2"
+  }
+}

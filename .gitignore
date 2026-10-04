@@ -4,3 +4,5 @@ node_modules/
 .DS_Store
 .vercel
 site-shot-*.png
+.wrangler/
+brag-output/brag.mp4

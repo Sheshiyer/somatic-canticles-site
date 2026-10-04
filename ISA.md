@@ -4,7 +4,7 @@ project: somatic-canticles-landing
 effort: E4
 effort_source: auto
 phase: verify
-progress: 20/84
+progress: 41/94
 mode: interactive
 started: 2026-09-26T03:18:00-07:00
 updated: 2026-09-26T03:25:00-07:00
@@ -152,15 +152,15 @@ Ship a zero-build static landing site in `Sheshiyer/somatic-canticles-landing` t
 - [ ] ISC-51: a favicon is linked and exists
 
 ### Brag video
-- [ ] ISC-52: `brag-output/brag-plan.md` exists
-- [ ] ISC-53: `brag-output/brag.mp4` duration is 15–25s (ffprobe)
-- [ ] ISC-54: the video is 1920×1080 (ffprobe)
-- [ ] ISC-55: the video has an audio stream (ffprobe)
-- [ ] ISC-56: `site/assets/brag.mp4` is ≤ 8 MB
-- [ ] ISC-57: `site/assets/brag.jpg` exists and matches frame 0 of the video
-- [ ] ISC-58: `brag-output/share-copy.txt` exists, contains 1–3 sentences, and has no "excited to share"
-- [ ] ISC-59: video stills show "Somatic Canticles" text in at least one scene (frame extraction)
-- [ ] ISC-60: the video's first 2s contain a readable hook line (frame at t=1.5s)
+- [x] ISC-52: `brag-output/brag-plan.md` exists
+- [x] ISC-53: `brag-output/brag.mp4` duration is 15–25s (ffprobe)
+- [x] ISC-54: the video is 1920×1080 (ffprobe)
+- [x] ISC-55: the video has an audio stream (ffprobe)
+- [x] ISC-56: `site/assets/brag.mp4` is ≤ 8 MB
+- [x] ISC-57: `site/assets/brag.jpg` exists and matches frame 0 of the video
+- [x] ISC-58: `brag-output/share-copy.txt` exists, contains 1–3 sentences, and has no "excited to share"
+- [x] ISC-59: video stills show "Somatic Canticles" text in at least one scene (frame extraction)
+- [x] ISC-60: the video's first 2s contain a readable hook line (frame at t=1.5s)
 
 ### Accessibility
 - [ ] ISC-61: a skip link to `#main` is the first focusable element
@@ -195,6 +195,18 @@ Ship a zero-build static landing site in `Sheshiyer/somatic-canticles-landing` t
 
 ### Deploy
 - [x] ISC-84: a Vercel preview URL returns 200 for `/` and for `/assets/brag.mp4`
+
+### Launch film (added 2026-10-04 — ID-stable, appended)
+- [x] ISC-85: film/out/video.mp4 renders all 900 frames at 1920x1080@60 with no page errors (render log)
+- [x] ISC-86: brag-output/brag-plan.md storyboard durations sum to 15.0 s (Read)
+- [x] ISC-87: film score is -14 ±1 LUFS integrated and ≤ -1.5 dBTP (ffmpeg ebur128 on out/audio.wav)
+- [x] ISC-88: score is deterministic: two runs of tools/audio.ts are byte-identical (shasum)
+- [x] ISC-89: picture is deterministic: two hash manifests over the same frame range match (render --hash)
+- [x] ISC-90: master passes the strobe check from frame 1 (luma jump < 20% per 3 frames) (verify.ts)
+- [x] ISC-91: the baked poster equals frame 0 of both cuts (PSNR ≥ 32 dB) (verify.ts)
+- [x] ISC-92: every on-screen book string in film/src/copy.ts appears verbatim in content/COPY.md (rg)
+- [x] ISC-93: Anti: film/ uses Remotion, Playwright, npm or npx (rg over film/package.json and film/tools)
+- [ ] ISC-94: the site serves the new film: site/assets/brag.mp4 duration 15.0 s and ≤ 8 MB (ffprobe/stat)
 
 ## Test Strategy
 
@@ -241,6 +253,11 @@ Ship a zero-build static landing site in `Sheshiyer/somatic-canticles-landing` t
 - 2026-09-27 14:40: created public repo Sheshiyer/somatic-canticles-site (author chose public-now over private-then-flip). Pushing first commit now with placeholder brag.mp4/brag.jpg (copies of the existing trilogy trailer) — the real /brag film has not been generated yet.
 - 2026-10-04 21:55: refined: hosting moved from Vercel to Cloudflare at the author's request. Deployed as a static-assets Worker `somatic-canticles-site` (wrangler profile 9d9d, account 9d9d23b2…) with Workers custom domain somatic.tryambakam.space. Chose a Worker over Pages because the OAuth token lacks DNS scopes and Workers custom domains create DNS + cert automatically. The name avoids collision with the existing `somatic-canticles` Worker on khaloree.tryambakam.space. Headers ported from vercel.json to site/_headers. vercel.json kept but unused.
 - 2026-10-04 21:58: fixed 4px horizontal overflow at 320px (decorative crop marks) with html,body{overflow-x:clip}. Verified clean at 320/375/600/800/1024/1440.
+- 2026-10-04 22:30: refined: the film follows brag's process (plan, laws, poster bake, share copy), but the composition and render use the house showreel engine from the Temperance (2D canvas, frame-pure, headless capture, TS synth) and Cambium (raw RGBA → ffmpeg, verify suite) reels, at the author's direction ("using brag as a base system… without using remotion"). This replaces /brag --full's Hyperframes composition. Hyperframes' chrome-headless-shell is reused as the renderer; it is plain Chromium, so there is no Brave canvas farbling.
+- 2026-10-04 22:30: the score was handed to Forge per the E3+ coding rule, but Forge could not start: the ForgeProgress.ts preflight looks only in ~/.bun/bin/codex, while codex lives in /opt/homebrew/bin. The Engineer agent type needs a git worktree (session cwd is not a repo). The score went to a general-purpose agent with the same objective spec; all specs were measured as passing.
+- 2026-10-04 22:35: page→resolve match cut: the page fades over 16 frames to stay under the strobe limit, while the bronze drop cap T is held as a 2D overlay and dissolves into the sigil, which starts at the T's size (both fill a ~360–720 px box).
+- 2026-10-04 23:40: determinism root cause: FontFace subsets registered via Promise.all without unicode-range raced per process, so glyphs present in both latin and latin-ext files (·) came from either. Fixed with explicit unicodeRange and fixed-order registration. Sequential runs are now bit-exact over 900 frames.
+- 2026-10-04 23:40: page fade lengthened to 24 linear frames after the web cut failed strobe (25% per 2 frames at f800); now 10.6% / 11.9%.
 
 ## Verification
 
@@ -248,3 +265,15 @@ Ship a zero-build static landing site in `Sheshiyer/somatic-canticles-landing` t
 - ISC-8: Grep: COPY.md pins v3 @ ba74a874 (short ba74a87) with per-block source lines (15 "source" refs)
 - ISC-69: stat: cover-book1 168954 B, cover-book2 129100 B, cover-book3 113556 B (all ≤ 250 KB)
 - ISC-84: curl: https://somatic.tryambakam.space/ -> 200 text/html, /assets/brag.mp4 -> 200 video/mp4, /nope -> 404; CSP/nosniff/referrer headers present; Browser pane: fonts loaded (Cinzel, EB Garamond, Fira Code), video playing, 0 console errors. (Criterion was written for a Vercel preview; satisfied on Cloudflare production instead.)
+- ISC-52, 86: Read: brag-output/brag-plan.md storyboard durations 2.5+3.0+4.0+2.5+1.5+1.5 = 15.0 s
+- ISC-53..55, 85: verify.ts on master: 900 frames, 1920x1080, 60/1, duration 15.000 s, AAC 48k stereo; render log 900/900 frames, no page errors
+- ISC-56: verify.ts --web: site/assets/brag.mp4 7.15 MB (≤ 8 MB), 1920x1080, 30/1, 450 frames
+- ISC-57, 91: verify.ts: frame 0 vs brag.jpg PSNR 47.1 dB (master), 40.9 dB (web)
+- ISC-58: Read: brag-output/share-copy.txt has 3 lines (name, canon logline level 2, URL); no "excited to share"
+- ISC-59, 60: stills f70 (hook line fully settled at 1.17 s) and f880 (SOMATIC CANTICLES wordmark) reviewed visually
+- ISC-87: ffmpeg ebur128 on out/audio.wav: I -14.0 LUFS, true peak -2.0 dBFS; muxed master -14.1 LUFS / -1.7 dBTP
+- ISC-88: shasum of two tools/audio.ts runs: b07e3703395fb877… both
+- ISC-89: render --hash a vs --hash b over all 900 frames: 0 differ (shuffled-order run: ≤ 2 values/frame at ±1 from Skia glyph-cache state; documented, not gated)
+- ISC-90: verify.ts: max luma jump 10.6% at f724 per 3 frames (master), 11.9% per 2 frames (web)
+- ISC-92: bun check: SAMPLE_P1 verbatim substring of content/COPY.md; chapter title, eyebrow, roles, logline present
+- ISC-93: rg over film/: only "No Remotion" comments; no Remotion/Playwright/npm/npx usage
