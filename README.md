@@ -34,18 +34,15 @@ degrades sanely (the form simply won't subscribe anyone).
 
 ## Regenerating the hero film
 
-`site/assets/brag.mp4` / `brag.jpg` are currently **placeholders** — copies of
-the existing trilogy trailer clip and poster, not a real `/brag` render. To
-regenerate the actual film once `site/` is deployed (or served locally):
+`site/assets/brag.mp4` and `brag.jpg` are the real launch film: 15 s, made with brag's process on the house showreel engine, with no Remotion. The pipeline lives in [`film/`](film/README.md):
 
 ```bash
-/brag --full --tone cinematic --format landscape
+cd film && bun install
+bun tools/audio.ts && bun run render && bun tools/mux.ts
+bun tools/verify.ts && bun tools/verify.ts --web
 ```
 
-run from this repo, pointed at the live/staged `site/`. Follow
-[`references/step-3-compose.md`](https://github.com/latent-spaces/brag/blob/main/skills/brag/references/step-3-compose.md)
-for the Hyperframes handoff. Copy the render's `brag.mp4` / `brag.jpg` into
-`site/assets/` afterward.
+`mux.ts` writes the poster (baked in as frame 0), the 1080p60 master in `brag-output/` (gitignored), the ≤ 8 MB web cut in `site/assets/`, and the share copy. It also re-stamps the film URLs.
 
 ## Hosting and asset loading
 
