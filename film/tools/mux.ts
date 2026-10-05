@@ -72,7 +72,12 @@ copyFileSync(share, join(BRAG, "share-copy.txt"));
 copyFileSync(web, join(SITE, "brag.mp4"));
 copyFileSync(poster, join(SITE, "brag.jpg"));
 
+// 6. cache-bust: /assets/* is immutable for a year, so the film URLs must change with its content
+const { stamp } = await import("../../scripts/stamp-assets.ts");
+const stamps = await stamp();
+
 const mb = (p: string) => (statSync(p).size / 1048576).toFixed(2);
+console.log(`stamped site/index.html: ${Object.entries(stamps).map(([f, v]) => `${f}?v=${v}`).join(", ")}`);
 console.log(`poster  f${POSTER_FRAME} -> brag.jpg (${mb(poster)} MB)`);
 console.log(`master  ${mb(master)} MB -> brag-output/brag.mp4`);
 console.log(`web     ${mb(web)} MB (video ${vKbps} kbps @1080p30) -> site/assets/brag.mp4`);

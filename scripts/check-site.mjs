@@ -2,6 +2,7 @@
 // Site sanity gate for site/index.html. Port of latent-spaces/brag scripts/check-docs.mjs.
 // Zero dependencies. Usage: bun scripts/check-site.mjs   (exit 1 on any failure)
 
+import { createHash } from "node:crypto";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -12,6 +13,7 @@ const indexPath = path.join(siteDir, "index.html");
 const html = readFileSync(indexPath, "utf8");
 
 const BUTTONDOWN = "https://buttondown.com/api/emails/embed-subscribe/";
+const ORIGIN = "https://somatic.tryambakam.space/";
 const TEXT_EXT = new Set([".html", ".css", ".js", ".mjs", ".json", ".svg", ".txt", ".md", ".xml", ".webmanifest"]);
 const SITE_BUDGET = 1.5 * 1024 * 1024;
 const COVER_BUDGET = 250 * 1024;
@@ -21,12 +23,16 @@ function check(name, failures) {
   results.push({ name, failures });
 }
 
+// same-origin absolute URLs (og:image, og:video) are checked as local files
+const sameOrigin = (value) => (value && value.startsWith(ORIGIN) ? value.slice(ORIGIN.length) : value);
 function isLocalReference(value) {
+  value = sameOrigin(value);
   return value && !value.startsWith("#") && !value.startsWith("//") && !/^[a-z][a-z0-9+.-]*:/i.test(value);
 }
 function localPathFor(value) {
-  return path.join(siteDir, value.split(/[?#]/, 1)[0]);
+  return path.join(siteDir, sameOrigin(value).split(/[?#]/, 1)[0]);
 }
+const stampOf = (rel) => createHash("sha256").update(readFileSync(path.join(siteDir, rel))).digest("hex").slice(0, 12);
 function attr(tag, name) {
   const m = tag.match(new RegExp(`\\b${name}\\s*=\\s*["']([^"']*)["']`, "i"));
   return m ? m[1] : null;
@@ -57,6 +63,18 @@ const siteFiles = walk(siteDir);
   check(`local references exist (${refs.filter(isLocalReference).length} checked)`, failures);
 }
 
+// (1b) film URLs carry ?v=<sha256 prefix of the file>; /assets/* is cached immutable for a year
+{
+  const failures = [];
+  for (const file of ["brag.mp4", "brag.jpg"]) {
+    const want = stampOf(path.join("assets", file));
+    const refs = [...html.matchAll(new RegExp(`assets/${file.replace(".", "\\.")}(\\?v=([0-9a-f]+))?`, "g"))];
+    if (!refs.length) failures.push(`no reference to assets/${file}`);
+    for (const r of refs) if (r[2] !== want) failures.push(`assets/${file} stamped ${r[2] ?? "(none)"}, file is ${want}; run bun scripts/stamp-assets.ts`);
+  }
+  check("film URLs stamped with current content hash", failures);
+}
+
 // (2) exactly 3 book cover <img> and 3 book titles
 {
   const failures = [];
@@ -83,8 +101,8 @@ const siteFiles = walk(siteDir);
   if (!video) failures.push("no <video id=hero-vid>");
   else {
     const tag = video[0];
-    if (attr(tag, "src") !== "assets/brag.mp4") failures.push(`hero src is ${attr(tag, "src")}, expected assets/brag.mp4`);
-    if (attr(tag, "poster") !== "assets/brag.jpg") failures.push(`hero poster is ${attr(tag, "poster")}, expected assets/brag.jpg`);
+    if (!/^assets\/brag\.mp4\?v=[0-9a-f]{12}$/.test(attr(tag, "src") ?? "")) failures.push(`hero src is ${attr(tag, "src")}, expected assets/brag.mp4?v=<stamp>`);
+    if (!/^assets\/brag\.jpg\?v=[0-9a-f]{12}$/.test(attr(tag, "poster") ?? "")) failures.push(`hero poster is ${attr(tag, "poster")}, expected assets/brag.jpg?v=<stamp>`);
     for (const a of ["muted", "loop", "playsinline"]) if (!hasBoolAttr(tag, a)) failures.push(`hero video missing ${a}`);
   }
   check("hero video src/poster/muted/loop/playsinline", failures);

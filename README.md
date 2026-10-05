@@ -47,6 +47,14 @@ run from this repo, pointed at the live/staged `site/`. Follow
 for the Hyperframes handoff. Copy the render's `brag.mp4` / `brag.jpg` into
 `site/assets/` afterward.
 
+## Hosting and asset loading
+
+The site deploys to Cloudflare as the Worker `somatic-canticles-site` on `somatic.tryambakam.space`. Deploy with `bunx wrangler deploy`.
+
+- **Static files:** everything under `site/` is served as static assets. Headers are set in `site/_headers`; `/assets/*` is cached `immutable` for a year.
+- **Video:** only `/assets/*.mp4` runs through [`worker/index.ts`](worker/index.ts), which answers `Range` requests with `206 Partial Content`. Cloudflare static assets answer ranges with a full 200, and Safari/iOS will not play or seek a `<video>` without 206.
+- **Cache-busting:** because assets are immutable, the film URLs carry `?v=<first 12 hex of the file's sha256>`. `film/tools/mux.ts` stamps them automatically via `bun scripts/stamp-assets.ts`, and `check-site.mjs` fails if a stamp does not match its file. Never edit the `?v=` values by hand.
+
 ## Content and provenance
 
 All book copy in [`content/COPY.md`](content/COPY.md) is sourced, block by

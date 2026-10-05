@@ -4,7 +4,7 @@ project: somatic-canticles-landing
 effort: E4
 effort_source: auto
 phase: verify
-progress: 41/94
+progress: 43/94
 mode: interactive
 started: 2026-09-26T03:18:00-07:00
 updated: 2026-09-26T03:25:00-07:00
@@ -191,7 +191,7 @@ Ship a zero-build static landing site in `Sheshiyer/somatic-canticles-landing` t
 - [ ] ISC-80: Anti: the site states a word count (363,077 / 220,091)
 - [ ] ISC-81: Anti: the site contains "Bio-Acoustic" as a genre keyword
 - [ ] ISC-82: Anti: the site loads a third-party analytics or tracking script
-- [ ] ISC-83: Antecedent: the hero video is visibly moving within 2s of load on desktop (Browser pane at t≈2s)
+- [x] ISC-83: Antecedent: the hero video is visibly moving within 2s of load on desktop (Browser pane at t≈2s)
 
 ### Deploy
 - [x] ISC-84: a Vercel preview URL returns 200 for `/` and for `/assets/brag.mp4`
@@ -206,7 +206,7 @@ Ship a zero-build static landing site in `Sheshiyer/somatic-canticles-landing` t
 - [x] ISC-91: the baked poster equals frame 0 of both cuts (PSNR ≥ 32 dB) (verify.ts)
 - [x] ISC-92: every on-screen book string in film/src/copy.ts appears verbatim in content/COPY.md (rg)
 - [x] ISC-93: Anti: film/ uses Remotion, Playwright, npm or npx (rg over film/package.json and film/tools)
-- [ ] ISC-94: the site serves the new film: site/assets/brag.mp4 duration 15.0 s and ≤ 8 MB (ffprobe/stat)
+- [x] ISC-94: the site serves the new film: site/assets/brag.mp4 duration 15.0 s and ≤ 8 MB (ffprobe/stat)
 
 ## Test Strategy
 
@@ -258,6 +258,7 @@ Ship a zero-build static landing site in `Sheshiyer/somatic-canticles-landing` t
 - 2026-10-04 22:35: page→resolve match cut: the page fades over 16 frames to stay under the strobe limit, while the bronze drop cap T is held as a 2D overlay and dissolves into the sigil, which starts at the T's size (both fill a ~360–720 px box).
 - 2026-10-04 23:40: determinism root cause: FontFace subsets registered via Promise.all without unicode-range raced per process, so glyphs present in both latin and latin-ext files (·) came from either. Fixed with explicit unicodeRange and fixed-order registration. Sequential runs are now bit-exact over 900 frames.
 - 2026-10-04 23:40: page fade lengthened to 24 linear frames after the web cut failed strobe (25% per 2 frames at f800); now 10.6% / 11.9%.
+- 2026-10-05: film deployed. Found and fixed three loading defects: (1) Workers static assets answer Range with a full 200, which breaks Safari/iOS video, so worker/index.ts now serves 206 for /assets/*.mp4 (run_worker_first); (2) /assets/* is immutable for a year but brag.mp4 kept its name, so a stale placeholder was served on first request; URLs now carry a content-hash ?v= stamp, enforced by check-site; (3) og:image/og:video were relative, which crawlers ignore; they are now absolute with dimensions and twitter:image. The edge had cached a range-less response for the first ?v= URL, which cannot be purged with this token's scopes, so stamps were lengthened to 12 hex to issue fresh URLs.
 
 ## Verification
 
@@ -277,3 +278,5 @@ Ship a zero-build static landing site in `Sheshiyer/somatic-canticles-landing` t
 - ISC-90: verify.ts: max luma jump 10.6% at f724 per 3 frames (master), 11.9% per 2 frames (web)
 - ISC-92: bun check: SAMPLE_P1 verbatim substring of content/COPY.md; chapter title, eyebrow, roles, logline present
 - ISC-93: rg over film/: only "No Remotion" comments; no Remotion/Playwright/npm/npx usage
+- ISC-94: curl https://somatic.tryambakam.space/assets/brag.mp4?v=6016638495e7: sha256 matches site/assets/brag.mp4 (6016638495e716ce…), 7,498,677 B, 15.000 s; Range 0-1023 → 206 Content-Range bytes 0-1023/7498677 (3 repeats, and after full GETs)
+- ISC-83: Browser pane on live site: hero video currentTime 5.49 s ~5 s after load (autoplay, muted); readyState 4; network brag.mp4 → 206; 0 console errors
